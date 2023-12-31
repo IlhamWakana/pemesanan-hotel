@@ -1,53 +1,92 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
+from PyQt5 import QtCore, QtGui, QtWidgets
+import mysql.connector as mc
 
-class LoginForm(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Login')
-        self.setGeometry(300, 300, 300, 200)
-        self.init_ui()
+class Ui_Form(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.resize(519, 207)
+        self.verticalLayout = QtWidgets.QVBoxLayout(Form)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setObjectName("label")
+        self.horizontalLayout.addWidget(self.label)
+        self.lineEditEmaul = QtWidgets.QLineEdit(Form)
+        self.lineEditEmaul.setObjectName("lineEditEmaul")
+        self.horizontalLayout.addWidget(self.lineEditEmaul)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label_2 = QtWidgets.QLabel(Form)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_2.addWidget(self.label_2)
+        self.lineEditPass = QtWidgets.QLineEdit(Form)
+        self.lineEditPass.setObjectName("lineEditPass")
+        self.horizontalLayout_2.addWidget(self.lineEditPass)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
+        self.pushButton = QtWidgets.QPushButton(Form)
+        self.pushButton.setObjectName("pushButton")
+        
+        
+        #tombol agar masuk ke database
+        self.pushButton.clicked.connect(self.insert_data)
+        self.verticalLayout.addWidget(self.pushButton)
+        self.labelResult = QtWidgets.QLabel(Form)
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.labelResult.setFont(font)
+        self.labelResult.setText("")
+        self.labelResult.setObjectName("labelResult")
+        self.verticalLayout.addWidget(self.labelResult)
 
-    def init_ui(self):
-        layout = QVBoxLayout()
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
+        
+    #inserting data to codeloop database in wampserver
+    def insert_data(self):
+        try:
+            mydb = mc.connect(
 
-        email_label = QLabel('Email:')
-        self.email_line_edit = QLineEdit()
-        password_label = QLabel('Password:')
-        self.password_line_edit = QLineEdit()
-        self.password_line_edit.setEchoMode(QLineEdit.Password)
+                host="localhost",
+                user="root",
+                password="",
+                database="login"
+            )
 
-        layout.addWidget(email_label)
-        layout.addWidget(self.email_line_edit)
-        layout.addWidget(password_label)
-        layout.addWidget(self.password_line_edit)
+            mycursor = mydb.cursor()
 
-        button_box = QWidget()
-        button_box_layout = QVBoxLayout()
-        button_box.setLayout(button_box_layout)
+            email = self.lineEditEmaul.text()
+            password =self.lineEditPass.text()
 
-        login_button = QPushButton('Masuk')
-        login_button.clicked.connect(self.on_login_clicked)
-        cancel_button = QPushButton('Batal')
-        cancel_button.clicked.connect(self.on_cancel_clicked)
+            sql = "INSERT INTO login (username, password) VALUES (%s, %s)"
+            val = (email, password)
 
-        button_box_layout.addWidget(login_button)
-        button_box_layout.addWidget(cancel_button)
+            mycursor.execute(sql, val)
 
-        layout.addWidget(button_box)
+            mydb.commit()
+            self.labelResult.setText("Data Inserted")
 
-        self.setLayout(layout)
-        self.setFixedSize(self.size())
+        except mc.Error as e:
+            self.labelResult.setText("Error Inserting Data")
 
-    def on_login_clicked(self):
-        email = self.email_line_edit.text()
-        password = self.password_line_edit.text()
-        print('Login with:', email, password)
+    def retranslateUi(self, Form):
+        _translate = QtCore.QCoreApplication.translate
+        Form.setWindowTitle(_translate("Form", "Pemesanan Hotel"))
+        self.label.setText(_translate("Form", "username"))
+        self.label_2.setText(_translate("Form", "Password:"))
+        self.pushButton.setText(_translate("Form", "Masuk"))
 
-    def on_cancel_clicked(self):
-        self.close()
 
-app = QApplication(sys.argv)
-login_form = LoginForm()
-login_form.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Form = QtWidgets.QWidget()
+    ui = Ui_Form()
+    ui.setupUi(Form)
+    Form.show()
+    sys.exit(app.exec_())
