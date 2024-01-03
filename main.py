@@ -1,5 +1,5 @@
 
-
+import mysql.connector
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
@@ -216,12 +216,32 @@ class Ui_MainWindow(object):
         kode_buku = self.IsiKode.text()
         judul_buku = self.JUDUL.currentText()
 
-        data_to_save = f"NAMA: {nama}\nNO.TELP: {no_telp}\nID CARD: {id_card}\nKODE BUKU: {kode_buku}\nJUDUL BUKU: {judul_buku}"
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="",
+                database="library",
+                port=3306
+            )
 
-        with open("output.txt", "w") as file:
-            file.write(data_to_save)
+            cursor = conn.cursor()
 
-        QtWidgets.QMessageBox.information(None, "Informasi", "Data berhasil disimpan!")
+            query = "INSERT INTO surat_pengunjung (nama, no_telp, id_card, kode_buku, judul_buku) VALUES (%s, %s, %s, %s, %s)"
+            values = (nama, no_telp, id_card, kode_buku, judul_buku)
+
+            cursor.execute(query, values)
+
+            conn.commit()
+
+            QtWidgets.QMessageBox.information(None, "Informasi", "Data berhasil disimpan di MySQL!")
+        except mysql.connector.Error as err:
+            print(f"MySQL Error: {err}")
+            QtWidgets.QMessageBox.warning(None, "Peringatan", f"Gagal menyimpan data di MySQL! Error: {err}")
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
         pass
 
 if __name__ == "__main__":
