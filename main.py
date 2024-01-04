@@ -1,6 +1,57 @@
 import mysql.connector
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
+class Ui_LoginWindow(object):
+    def setupUi(self, LoginWindow):
+        LoginWindow.setObjectName("LoginWindow")
+        LoginWindow.resize(400, 200)
+
+        self.centralwidget = QtWidgets.QWidget(LoginWindow)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.label_email = QtWidgets.QLabel(self.centralwidget)
+        self.label_email.setGeometry(QtCore.QRect(50, 50, 71, 16))
+        self.label_email.setObjectName("label_Username")
+
+        self.label_password = QtWidgets.QLabel(self.centralwidget)
+        self.label_password.setGeometry(QtCore.QRect(50, 90, 71, 16))
+        self.label_password.setObjectName("label_password")
+
+        self.lineEdit_email = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit_email.setGeometry(QtCore.QRect(130, 50, 191, 20))
+        self.lineEdit_email.setObjectName("lineEdit_username")
+
+        self.lineEdit_password = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit_password.setGeometry(QtCore.QRect(130, 90, 191, 20))
+        self.lineEdit_password.setObjectName("lineEdit_password")
+
+        self.pushButton_login = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_login.setGeometry(QtCore.QRect(150, 140, 75, 23))
+        self.pushButton_login.setObjectName("pushButton_login")
+        
+        self.pushButton_cancel = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_cancel.setGeometry(QtCore.QRect(250, 140, 75, 23))
+        self.pushButton_cancel.setObjectName("pushButton_cancel")
+
+        LoginWindow.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(LoginWindow)
+        QtCore.QMetaObject.connectSlotsByName(LoginWindow)
+
+    def retranslateUi(self, LoginWindow):
+        _translate = QtCore.QCoreApplication.translate
+        LoginWindow.setWindowTitle(_translate("LoginWindow", "Login"))
+        self.label_email.setText(_translate("LoginWindow", "Username:"))
+        self.label_password.setText(_translate("LoginWindow", "Password:"))
+        self.pushButton_login.setText(_translate("LoginWindow", "Login"))
+        self.pushButton_cancel.setText(_translate("LoginWindow", "Batal"))
+        
+        
+
+        
+
+#Formulir Peminjaman Buku
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -133,7 +184,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Peminjaman Buku"))
         self.label_2.setText(_translate("MainWindow", "NAMA"))
         self.label_7.setText(_translate("MainWindow", "LAMA"))
         self.label_6.setText(_translate("MainWindow", "NO.TELP"))
@@ -208,6 +259,7 @@ class Ui_MainWindow(object):
 
         pass
 
+#Koneksi ke database
     def on_Simpan_clicked(self):
         nama = self.IsiNama.toPlainText()
         no_telp = self.IsiNoTelp.toPlainText()
@@ -233,21 +285,36 @@ class Ui_MainWindow(object):
 
             conn.commit()
 
-            QtWidgets.QMessageBox.information(None, "Informasi", "Data berhasil disimpan di MySQL!")
+            QtWidgets.QMessageBox.information(None, "Informasi", "Data berhasil disimpan")
         except mysql.connector.Error as err:
             print(f"MySQL Error: {err}")
-            QtWidgets.QMessageBox.warning(None, "Peringatan", f"Gagal menyimpan data di MySQL! Error: {err}")
+            QtWidgets.QMessageBox.warning(None, "Peringatan", f"Gagal menyimpan data, Error: {err}")
         finally:
             if conn.is_connected():
                 cursor.close()
                 conn.close()
         pass
+    
+class LoginWindow(QtWidgets.QMainWindow, Ui_LoginWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setWindowTitle("Login")
+        self.pushButton_login.clicked.connect(self.on_login_clicked)
+        self.pushButton_cancel.clicked.connect(self.close)
+
+    def on_login_clicked(self):
+        self.close()
+        main_window.show()
+
+    
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    login_window = LoginWindow()
+    login_window.show()
+    main_window = QtWidgets.QMainWindow()
+    ui_main = Ui_MainWindow()
+    ui_main.setupUi(main_window)
     sys.exit(app.exec_())
